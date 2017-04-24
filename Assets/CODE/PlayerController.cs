@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    public float speed = 8;
+    public Vector2 speedMinMax = new Vector2(6, 8);
 
     float screenHalfWidth;
 
@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     // every frame
     void Update()
     {
-        float velocity = Input.GetAxisRaw("Horizontal") * speed;
+        float velocity = Input.GetAxisRaw("Horizontal") * Mathf.Lerp(speedMinMax.x, speedMinMax.y, Difficulty.GetDiffucultyPercent());
         transform.Translate(Vector2.right * velocity * Time.deltaTime);
 
         if (transform.position.x > screenHalfWidth)
@@ -29,8 +29,14 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //if (collision.tag == "Enemy")
-        Debug.Log("wow");
-        Destroy(this.gameObject);
+        gameObject.GetComponent<Renderer>().enabled = false;
+        StartCoroutine(RestartGame());
+    }
+
+    IEnumerator RestartGame() {
+        yield return new WaitForSeconds(1f);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        Difficulty.ResetDiffuculty();
+        yield return null;
     }
 }
